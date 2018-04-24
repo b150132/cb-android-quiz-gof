@@ -1,0 +1,26 @@
+<resources>
+    <!-- Common dimensions -->
+    <dimen name="toolbar_height">56dp</dimen>
+    <dimen name="one_dp">1dp</dimen>
+
+    <!-- Gesture -->
+    <dimen name="touch_slop">6dp</dimen>
+    <dimen name="tap_slop">24dp</dimen>
+    <dimen name="fling_min_vec">400dp</dimen>
+    <dimen name="fling_max_vec">1000dp</dimen>
+
+    <!-- Sketch dimensions/integers -->
+    <dimen name="sketch_min_stroke_width">1dp</dimen>
+    <dimen name="sketch_max_stroke_width">50dp</dimen>
+    <dimen name="sketch_min_path_segment_length">3dp</dimen>
+    <integer name="sketch_min_path_segment_interval">10</integer>
+    <!-- Brush dimensions -->
+    <dimen name="brush_border_width">1dp</dimen>
+    <dimen name="brush_selected_border_width">3dp</dimen>
+    <!-- Stroke dimensions -->
+    <dimen name="stroke_seek_bar_thumb_size">24dp</dimen>
+    <dimen name="stroke_seek_bar_thumb_border">2dp</dimen>
+    <dimen name="stroke_seek_bar_preview_border">2dp</dimen>
+    <dimen name="stroke_seek_bar_track_start_height">0dp</dimen>
+    <dimen name="stroke_seek_bar_track_stop_height">10dp</dimen>
+</resources>
