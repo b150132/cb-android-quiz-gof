@@ -35,8 +35,9 @@ class GofView : View {
     private val step : Float
     lateinit var mPoints: FloatArray
 
-    //第一次畫圖
+    //First draw
     private var isFrist : Boolean
+
     lateinit var tab: Array<FloatArray>
     lateinit var nextTab: Array<FloatArray>
     private val rowSize : Int
@@ -77,15 +78,25 @@ class GofView : View {
             Random().nextInt((endInclusive + 1) - start) +  start
 
     open class LifeGame(rowSize: Int, cellSize: Int) {
+        //First array to record points
         var tab: Array<FloatArray> = Array(rowSize) { FloatArray(cellSize) }
 
         fun nextTab(tab: Array<FloatArray>): Array<FloatArray> {
+            //Next generation array
             val nextTab = Array(tab.size) { FloatArray(tab[0].size) }
+            //point numbers which is around center point
             var count: Int
 
+            /*rule:
+            1.Any live cell with fewer than two live neighbors dies, as if by under population.
+            2.Any live cell with two or three live neighbors lives on to the next generation.
+            3.Any live cell with more than three live neighbors dies, as if by overpopulation.
+            4.Any dead cell with exactly three live neighbors becomes a live cell, as if by reproduction.
+            */
             for (i in tab.indices) {
                 for (j in 0 until tab[i].size) {
                     count = 0
+                    //check 3 by 3 grid
                     for (x in -1..1) {
                         for (y in -1..1) {
                             if (i + x >= 0 && j + y >= 0 && i + x < tab.size && j + y < tab[i].size && !(x == 0 && y == 0)) {
@@ -94,10 +105,13 @@ class GofView : View {
                         }
                     }
                     if (count == 2) {
+                        //same
                         nextTab[i][j] = tab[i][j]
                     } else if (count == 3) {
+                        //alive
                         nextTab[i][j] = 1f
                     } else {
+                        //dead
                         nextTab[i][j] = 0f
                     }
                 }
@@ -107,6 +121,7 @@ class GofView : View {
         }
 
         fun newTab(): Array<FloatArray> {
+            //generate random point
             val ran = Random()
             for (i in 0 until tab.size) {
                 for (j in 0 until tab[i].size) {
@@ -117,6 +132,7 @@ class GofView : View {
         }
 
         fun print(tab: Array<FloatArray>) {
+            //print on terminal
             println()
             for (i in tab.indices) {
                 for (j in 0 until tab[i].size) {
@@ -128,16 +144,16 @@ class GofView : View {
     }
 
     override fun onDraw(canvas: Canvas) {
-        //同步
+        //同步 lock object
         synchronized(this) {
-            //除間距後的點數
+            //divide step so we can get the numbers of row and column point on phone screen
             val xCount = width / step.toInt()
             val yCount = height / step.toInt()
 
-            //第一次繪圖
+            //First draw
             if (isFrist) {
 
-                //初始化, 點總數=(X,Y)
+                //initial points one dimension array, the total numbers of point is (X,Y)
                 mPoints = FloatArray(xCount * yCount * 2)
 
                 tab = lifeGame.newTab()
@@ -148,13 +164,13 @@ class GofView : View {
                 for (j in 0 until xCount )
                     for (i in 0 until yCount * 2) {
                         if (i/2 < rowSize && j < cellSize)
-                            if (tab[i/2][j] != 0f) {
+                            if (tab[i/2][j] != 0f) { //if not die
                                 if (i % 2 == 0) {
-                                    //畫橫座標
+                                    //x-axis
                                     mPoints[j * xCount * 2 + i] = i / 2 * step
 
                                 } else {
-                                    //畫縱坐標
+                                    //y-axis
                                     mPoints[j * xCount * 2 + i] = j * step
                                 }
                             }
@@ -170,13 +186,13 @@ class GofView : View {
                 for (j in 0 until xCount )
                     for (i in 0 until yCount * 2) {
                         if (i/2 < rowSize && j < cellSize)
-                            if (tab[i/2][j] != 0f) {
+                            if (tab[i/2][j] != 0f) { //if not die
                                 if (i % 2 == 0) {
-                                    //畫橫坐標
+                                    //x-axis
                                     mPoints[j * xCount * 2 + i] = i / 2 * step
 
                                 } else {
-                                    //畫縱坐標
+                                    //y-axis
                                     mPoints[j * xCount * 2 + i] = j * step
                                 }
                             }
@@ -187,11 +203,12 @@ class GofView : View {
                 nextTab = lifeGame.nextTab(tab);
             }
 
+            //Random change color
             //paint.setARGB((0..255).random(),(0..255).random(), (0..255).random(), (0..255).random())
 
             canvas.drawPoints(mPoints, paint)
 
-            //延遲一秒更新畫面
+            //Delay one second to renew screen
             postInvalidateDelayed(1000)
         }
     }

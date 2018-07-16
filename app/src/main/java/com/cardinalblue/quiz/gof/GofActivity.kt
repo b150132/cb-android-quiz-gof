@@ -28,6 +28,7 @@ import com.cardinalblue.quiz.gof.view.GofView
 
 class GofActivity : AppCompatActivity() {
 
+    //Delay initial?
     private val mGofView by lazy { findViewById<GofView>(R.id.gof_view) }
 
     override fun onCreate(savedState: Bundle?) {

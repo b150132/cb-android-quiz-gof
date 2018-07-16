@@ -47,6 +47,7 @@ class SplashScreenActivity : AppCompatActivity() {
             .just(true)
             .delay(150, TimeUnit.MILLISECONDS)
             .subscribe {
+                //add one Observer and request, after subscribe, observable start to work
                 startActivity(Intent(this@SplashScreenActivity,
                                      GofActivity::class.java))
                 finish()
