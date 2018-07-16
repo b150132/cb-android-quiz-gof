@@ -23,14 +23,176 @@
 package com.cardinalblue.quiz.gof.view
 
 import android.content.Context
+import android.graphics.Canvas
+import android.graphics.Color
+import android.graphics.Paint
 import android.util.AttributeSet
 import android.view.View
+import java.util.*
 
 class GofView : View {
+    private var paint: Paint
+    private val step : Float
+    lateinit var mPoints: FloatArray
+
+    //第一次畫圖
+    private var isFrist : Boolean
+    lateinit var tab: Array<FloatArray>
+    lateinit var nextTab: Array<FloatArray>
+    private val rowSize : Int
+    private val cellSize : Int
+    private val lifeGame : LifeGame
+
+    init {
+        // Paint
+        paint = Paint()
+        setupPaint()
+        // 點間距
+        step = 15f
+
+        isFrist = true
+
+        rowSize = 100
+        cellSize = 300
+        lifeGame = LifeGame(rowSize, cellSize)
+    }
 
     constructor(context: Context?) : super(context)
     constructor(context: Context?, attrs: AttributeSet?) : super(context, attrs)
     constructor(context: Context?, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr) {
         // TODO: Finish the implementation
+    }
+
+    private fun setupPaint() {
+        //Paint.style – 繪製模式
+        //paint.setColor(int Color) – 顏色
+        //Paint.strokeWidth – 線條寬度
+        //Paint.isAntiAlias – 抗鋸齒開關
+        paint = Paint(Paint.ANTI_ALIAS_FLAG)
+        paint.setStyle(Paint.Style.FILL_AND_STROKE)
+        paint.setColor(Color.BLACK)
+        paint.setStrokeWidth(15f)
+    }
+    fun ClosedRange<Int>.random() =
+            Random().nextInt((endInclusive + 1) - start) +  start
+
+    open class LifeGame(rowSize: Int, cellSize: Int) {
+        var tab: Array<FloatArray> = Array(rowSize) { FloatArray(cellSize) }
+
+        fun nextTab(tab: Array<FloatArray>): Array<FloatArray> {
+            val nextTab = Array(tab.size) { FloatArray(tab[0].size) }
+            var count: Int
+
+            for (i in tab.indices) {
+                for (j in 0 until tab[i].size) {
+                    count = 0
+                    for (x in -1..1) {
+                        for (y in -1..1) {
+                            if (i + x >= 0 && j + y >= 0 && i + x < tab.size && j + y < tab[i].size && !(x == 0 && y == 0)) {
+                                count += tab[i + x][j + y].toInt()
+                            }
+                        }
+                    }
+                    if (count == 2) {
+                        nextTab[i][j] = tab[i][j]
+                    } else if (count == 3) {
+                        nextTab[i][j] = 1f
+                    } else {
+                        nextTab[i][j] = 0f
+                    }
+                }
+            }
+
+            return nextTab
+        }
+
+        fun newTab(): Array<FloatArray> {
+            val ran = Random()
+            for (i in 0 until tab.size) {
+                for (j in 0 until tab[i].size) {
+                    this.tab[i][j] = ran.nextInt(2).toFloat()
+                }
+            }
+            return this.tab
+        }
+
+        fun print(tab: Array<FloatArray>) {
+            println()
+            for (i in tab.indices) {
+                for (j in 0 until tab[i].size) {
+                    print(if (tab[i][j] == 0f) ". " else "# ")
+                }
+                println("")
+            }
+        }
+    }
+
+    override fun onDraw(canvas: Canvas) {
+        //同步
+        synchronized(this) {
+            //除間距後的點數
+            val xCount = width / step.toInt()
+            val yCount = height / step.toInt()
+
+            //第一次繪圖
+            if (isFrist) {
+
+                //初始化, 點總數=(X,Y)
+                mPoints = FloatArray(xCount * yCount * 2)
+
+                tab = lifeGame.newTab()
+                lifeGame.print(tab)
+                println()
+
+                mPoints = FloatArray(xCount * yCount * 2)
+                for (j in 0 until xCount )
+                    for (i in 0 until yCount * 2) {
+                        if (i/2 < rowSize && j < cellSize)
+                            if (tab[i/2][j] != 0f) {
+                                if (i % 2 == 0) {
+                                    //畫橫座標
+                                    mPoints[j * xCount * 2 + i] = i / 2 * step
+
+                                } else {
+                                    //畫縱坐標
+                                    mPoints[j * xCount * 2 + i] = j * step
+                                }
+                            }
+                    }
+
+                nextTab = lifeGame.nextTab(tab);
+                isFrist = !isFrist
+            }
+
+            if (!Arrays.deepEquals(tab, nextTab)) {
+                lifeGame.print(nextTab);
+                mPoints = FloatArray(xCount * yCount * 2)
+                for (j in 0 until xCount )
+                    for (i in 0 until yCount * 2) {
+                        if (i/2 < rowSize && j < cellSize)
+                            if (tab[i/2][j] != 0f) {
+                                if (i % 2 == 0) {
+                                    //畫橫坐標
+                                    mPoints[j * xCount * 2 + i] = i / 2 * step
+
+                                } else {
+                                    //畫縱坐標
+                                    mPoints[j * xCount * 2 + i] = j * step
+                                }
+                            }
+
+                    }
+                System.out.println();
+                tab = nextTab;
+                nextTab = lifeGame.nextTab(tab);
+            }
+
+            //paint.setARGB((0..255).random(),(0..255).random(), (0..255).random(), (0..255).random())
+
+            canvas.drawPoints(mPoints, paint)
+
+            //延遲一秒更新畫面
+            postInvalidateDelayed(1000)
+        }
     }
 }
